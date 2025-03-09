@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 import requests
 import time
-import uuid
+import builtins
+
+uuid = builtins.__import__('uuid')
 
 app = Flask(__name__)
 
@@ -22,7 +24,7 @@ def check_song_ready(uid):
 @app.route("/music", methods=["POST"])
 def create_music():
     data = request.json
-    title = "Ai Generated Music"
+    title = data.get("title", "Untitled")
     lyrics = data.get("lyrics")
     uid = generate_uid()
     
