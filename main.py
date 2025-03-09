@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
 import requests
 import time
+import uuid
 
 app = Flask(__name__)
 
 EXTERNAL_API_URL = "https://riffit-song-server-qb66e4cj5q-uc.a.run.app/videoSong"
 STORAGE_BASE_URL = "https://video-song-renderer-bucket-prod.storage.googleapis.com/"
 
+def generate_uid():
+    return str(uuid.uuid4())
 
 def check_song_ready(uid):
     song_url = f"{STORAGE_BASE_URL}{uid}/index.m3u8"
@@ -16,13 +19,13 @@ def check_song_ready(uid):
             return song_url
         time.sleep(5)
 
-
 @app.route("/music", methods=["POST"])
 def create_music():
     data = request.json
-    title = "Ai Music"
+    title = data.get("title")
     lyrics = data.get("lyrics")
-
+    uid = generate_uid()
+    
     payload = {
         "text": lyrics,
         "genre": "Indie",
@@ -33,19 +36,16 @@ def create_music():
         "accompanimentVolume": 1,
         "image": "",
         "project": "songr",
-        "uid": "36f1e55c-1977-4b47-9988-bc915c82b441"
+        "uid": uid
     }
-
+    
     response = requests.post(EXTERNAL_API_URL, json=payload)
     if response.status_code != 200:
         return jsonify({"error": "Failed to create song"}), 500
-
-    response_data = response.json()
-    uid = response_data.get("uid")
-
+    
     song_url = check_song_ready(uid)
     return jsonify({"songUrl": song_url})
 
-
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True)
+    
