@@ -20,7 +20,7 @@ def check_song_ready(uid):
 @app.route("/music", methods=["POST"])
 def create_music():
     data = request.json
-    title = data.get("title")
+    title = "Ai Music"
     lyrics = data.get("lyrics")
 
     payload = {
